@@ -1,0 +1,222 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  patient
+  psychologist
+  admin
+}
+
+enum ConsultationChannel {
+  chat
+  video
+}
+
+enum ConsultationStatus {
+  scheduled
+  ongoing
+  completed
+  cancelled
+  no_show
+  refunded
+}
+
+model User {
+  id            BigInt    @id @default(autoincrement())
+  role          UserRole
+  full_name     String    @db.VarChar(150)
+  email         String    @unique @db.VarChar(190)
+  phone         String?   @db.VarChar(30)
+  password      String    @db.VarChar(255)
+  gender        String?   @db.VarChar(10)
+  date_of_birth DateTime?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  psychologist  Psychologist?
+  consultations Consultations[]       @relation("PatientConsultations")
+  reviews       Review[]
+  intakeForms   IntakeForm[]
+  aiNotes       AiConsultationNotes[]
+}
+
+model Psychologist {
+  id           BigInt   @id
+  license_no   String   @db.VarChar(100)
+  bio          String?
+  price_chat   Decimal  @db.Decimal(12, 2)
+  price_video  Decimal  @db.Decimal(12, 2)
+  rating_avg   Decimal? @db.Decimal(3, 2)
+  rating_count Int      @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user           User                    @relation(fields: [id], references: [id])
+  specialties    PsychologistSpecialty[]
+  availabilities Availability[]
+  consultations  Consultations[]         @relation("PsychologistConsultations")
+  reviews        Review[]
+  intakeForms    IntakeForm[]
+  aiNotes        AiConsultationNotes[]
+}
+
+model Specialty {
+  id         BigInt   @id @default(autoincrement())
+  name       String   @unique @db.VarChar(120)
+  created_at DateTime @default(now())
+
+  psychologists PsychologistSpecialty[]
+}
+
+model PsychologistSpecialty {
+  psychologist_id BigInt
+  specialty_id    BigInt
+  created_at      DateTime @default(now())
+
+  psychologist Psychologist @relation(fields: [psychologist_id], references: [id])
+  specialty    Specialty    @relation(fields: [specialty_id], references: [id])
+
+  @@id([psychologist_id, specialty_id])
+}
+
+model Availability {
+  id              BigInt   @id @default(autoincrement())
+  psychologist_id BigInt
+  weekday         Int
+  start_time      DateTime @db.Time
+  end_time        DateTime @db.Time
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  psychologist Psychologist @relation(fields: [psychologist_id], references: [id])
+
+  @@index([psychologist_id, weekday])
+}
+
+model Consultations {
+  id                 BigInt              @id @default(autoincrement())
+  patient_id         BigInt
+  psychologist_id    BigInt
+  channel            ConsultationChannel
+  status             ConsultationStatus
+  scheduled_start_at DateTime?
+  scheduled_end_at   DateTime?
+  price              Decimal             @db.Decimal(12, 2)
+  patient_notes      String?
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @updatedAt
+
+  patient       User                 @relation("PatientConsultations", fields: [patient_id], references: [id])
+  psychologist  Psychologist         @relation("PsychologistConsultations", fields: [psychologist_id], references: [id])
+  streamChannel StreamChannel?
+  payment       Payment?
+  review        Review?
+  intakeForm    IntakeForm?
+  aiNotes       AiConsultationNotes?
+
+  @@index([patient_id])
+  @@index([psychologist_id, scheduled_start_at])
+  @@index([status])
+  @@index([channel])
+}
+
+model StreamChannel {
+  id                BigInt   @id @default(autoincrement())
+  consultation_id   BigInt   @unique
+  stream_channel_id String   @unique @db.VarChar(120)
+  stream_type       String?  @db.VarChar(20)
+  created_at        DateTime @default(now())
+
+  consultation Consultations @relation(fields: [consultation_id], references: [id])
+
+  @@index([consultation_id])
+}
+
+model Payment {
+  id              BigInt    @id @default(autoincrement())
+  consultation_id BigInt    @unique
+  amount          Decimal   @db.Decimal(12, 2)
+  method          String    @db.VarChar(30)
+  status          String    @db.VarChar(20)
+  paid_at         DateTime?
+  external_id     String    @unique @db.VarChar(120)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  consultation Consultations @relation(fields: [consultation_id], references: [id])
+
+  @@index([consultation_id])
+  @@index([status])
+}
+
+model Review {
+  id              BigInt   @id @default(autoincrement())
+  consultation_id BigInt   @unique
+  patient_id      BigInt
+  psychologist_id BigInt
+  rating          Int
+  comment         String?
+  created_at      DateTime @default(now())
+
+  consultation Consultations @relation(fields: [consultation_id], references: [id])
+  patient      User          @relation(fields: [patient_id], references: [id])
+  psychologist Psychologist  @relation(fields: [psychologist_id], references: [id])
+
+  @@index([psychologist_id, created_at])
+}
+
+model IntakeForm {
+  id              BigInt   @id @default(autoincrement())
+  consultation_id BigInt   @unique
+  patient_id      BigInt
+  psychologist_id BigInt
+  symptoms_text   String?
+  duration_text   String?
+  triggers_text   String?
+  goals_text      String?
+  additional_info String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  consultation Consultations     @relation(fields: [consultation_id], references: [id])
+  patient      User              @relation(fields: [patient_id], references: [id])
+  psychologist Psychologist      @relation(fields: [psychologist_id], references: [id])
+  aiAnalysis   AiIntakeAnalysis?
+}
+
+model AiIntakeAnalysis {
+  id                   BigInt   @id @default(autoincrement())
+  intake_form_id       BigInt   @unique
+  risk_level           String   @db.VarChar(20)
+  risk_score           Decimal? @db.Decimal(3, 2)
+  risk_flags_json      String?
+  recommendations_text String?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  intakeForm IntakeForm @relation(fields: [intake_form_id], references: [id])
+}
+
+model AiConsultationNotes {
+  id                         BigInt   @id @default(autoincrement())
+  consultation_id            BigInt   @unique
+  psychologist_id            BigInt
+  patient_id                 BigInt
+  notes_text                 String?
+  diarization_json           String?
+  risk_analysis_json         String?
+  mitigation_recommendations String?
+  created_at                 DateTime @default(now())
+  updated_at                 DateTime @updatedAt
+
+  consultation Consultations @relation(fields: [consultation_id], references: [id])
+  psychologist Psychologist  @relation(fields: [psychologist_id], references: [id])
+  patient      User          @relation(fields: [patient_id], references: [id])
+}
