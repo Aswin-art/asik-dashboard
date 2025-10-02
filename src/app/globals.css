@@ -99,50 +99,51 @@ These serve as the fallback; there is no separate default.css file. */
 }
 
 .dark {
-  --background: 15 23 42; /* Dark navy */
-  --foreground: 240 248 255; /* Light text */
+  /* Dark mode palette (valid CSS colors) */
+  --background: #0f172a; /* Dark navy */
+  --foreground: #f0f8ff; /* Light text */
 
-  --card: 30 41 59;
-  --card-foreground: 240 248 255;
+  --card: #1e293b;
+  --card-foreground: #f0f8ff;
 
-  --popover: 30 41 59;
-  --popover-foreground: 240 248 255;
+  --popover: #1e293b;
+  --popover-foreground: #f0f8ff;
 
-  --primary: 56 178 172; /* Teal */
-  --primary-foreground: 255 255 255;
+  --primary: #38b2ac; /* Teal */
+  --primary-foreground: #ffffff;
 
-  --secondary: 134 239 172; /* Sage green */
-  --secondary-foreground: 30 41 59;
+  --secondary: #86efac; /* Sage green */
+  --secondary-foreground: #1e293b;
 
-  --accent: 125 211 252; /* Light sky blue */
-  --accent-foreground: 30 41 59;
+  --accent: #7dd3fc; /* Light sky blue */
+  --accent-foreground: #1e293b;
 
-  --muted: 51 65 85;
-  --muted-foreground: 148 163 184;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
 
-  --destructive: 248 113 113;
-  --destructive-foreground: 255 255 255;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
 
-  --border: 51 65 85;
-  --input: 51 65 85;
-  --ring: 56 178 172;
+  --border: #334155;
+  --input: #334155;
+  --ring: #38b2ac;
 
   /* Chart */
-  --chart-1: 56 178 172; /* Teal */
-  --chart-2: 134 239 172; /* Sage */
-  --chart-3: 125 211 252; /* Sky blue */
-  --chart-4: 148 163 184; /* Gray */
-  --chart-5: 129 140 248; /* Indigo */
+  --chart-1: #38b2ac; /* Teal */
+  --chart-2: #86efac; /* Sage */
+  --chart-3: #7dd3fc; /* Sky blue */
+  --chart-4: #94a3b8; /* Gray */
+  --chart-5: #818cf8; /* Indigo */
 
   /* Sidebar */
-  --sidebar: 30 41 59;
-  --sidebar-foreground: 240 248 255;
-  --sidebar-primary: 56 178 172;
-  --sidebar-primary-foreground: 255 255 255;
-  --sidebar-accent: 51 65 85;
-  --sidebar-accent-foreground: 240 248 255;
-  --sidebar-border: 51 65 85;
-  --sidebar-ring: 56 178 172;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f0f8ff;
+  --sidebar-primary: #38b2ac;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f0f8ff;
+  --sidebar-border: #334155;
+  --sidebar-ring: #38b2ac;
 }
 
 @layer utilities {
