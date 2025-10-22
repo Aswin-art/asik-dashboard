@@ -4,11 +4,14 @@ import { useQueryState, parseAsString, parseAsInteger, parseAsStringEnum } from 
 import { Grid3x3, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Doctor, doctors } from "./_data/doctors-data";
+import { Doctor } from "./_data/doctors-data";
 import { DoctorCard } from "./_components/doctor-card";
 import { DoctorPagination } from "./_components/doctor-pagination";
 import { FilterSidebar } from "./_components/filter-sidebar";
 import { MobileFilter } from "./_components/mobile-filter";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ViewMode = "grid" | "list";
 type SortOption = "name-asc" | "name-desc" | "rating-desc" | "experience-desc" | "price-asc";
@@ -18,10 +21,6 @@ export default function DoctorsPage() {
   const [searchQuery, setSearchQuery] = useQueryState("search", parseAsString.withDefault(""));
   const [selectedSpecialty, setSelectedSpecialty] = useQueryState("specialty", parseAsString.withDefault("all"));
   const [selectedRating, setSelectedRating] = useQueryState("rating", parseAsString.withDefault("all"));
-  const [selectedAvailability, setSelectedAvailability] = useQueryState(
-    "availability",
-    parseAsString.withDefault("all"),
-  );
   const [viewMode, setViewMode] = useQueryState(
     "view",
     parseAsStringEnum<ViewMode>(["grid", "list"]).withDefault("grid"),
@@ -35,7 +34,99 @@ export default function DoctorsPage() {
     ),
   );
 
-  // Get unique specialties
+  // ===== Data Fetching (React Query) =====
+  interface PsychologistResponse {
+    id: bigint | number | string;
+    license_no?: string | null;
+    bio?: string | null;
+    price_chat?: string | null;
+    price_video?: string | null;
+    rating_avg?: string | null;
+    rating_count: number;
+    created_at: Date | string;
+    updated_at?: Date | string | null;
+    user: {
+      id: bigint | number | string;
+      full_name: string;
+      image: string;
+      email: string;
+      gender?: string | null;
+    };
+    specialties: {
+      specialty: {
+        id: bigint | number | string;
+        name: string;
+      };
+    }[];
+  }
+
+  interface PsychologistApiResponse {
+    items: PsychologistResponse[];
+  }
+
+  const calculateExperience = (createdAt: Date | string): string => {
+    const startYear = new Date(createdAt).getFullYear();
+    const years = new Date().getFullYear() - (isNaN(startYear) ? new Date().getFullYear() : startYear);
+    return `${years} tahun`;
+  };
+
+  const getImageByGender = (gender?: string | null, fallbackUrl?: string): string => {
+    if (fallbackUrl && fallbackUrl.trim().length > 0) return fallbackUrl;
+    if (gender === "female" || gender === "perempuan") {
+      return "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&dpr=2&q=80";
+    }
+    return "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&dpr=2&q=80";
+  };
+
+  const toNumericId = (value: PsychologistResponse["id"]): number => {
+    const s = String(value);
+    const digits = (s.match(/\d+/g) || []).join("");
+    const n = digits ? Number(digits.slice(-9)) : NaN; // keep it within safe range
+    if (!Number.isNaN(n)) return n;
+    // fallback: stable hash
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      hash = (hash << 5) - hash + s.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  };
+
+  async function fetchDoctors(): Promise<Doctor[]> {
+    const response = await api.get<PsychologistApiResponse>("/psychologists");
+    const { items } = response;
+
+    return items.map((p): Doctor => {
+      const priceStr = p.price_video ?? p.price_chat ?? "0";
+      const price = parseInt(String(priceStr).replace(/[^0-9]/g, "")) || 0;
+      const rating = p.rating_avg ? parseFloat(p.rating_avg) : 0;
+      const specialty = p.specialties?.[0]?.specialty?.name || "Psikolog";
+      const idNum = toNumericId(p.id);
+      return {
+        id: idNum,
+        name: p.user.full_name,
+        specialty,
+        rating,
+        reviews: p.rating_count || 0,
+        experience: calculateExperience(p.created_at),
+        price,
+        image: getImageByGender(p.user.gender, p.user.image),
+        available: true,
+        description: p.bio || `Psikolog berpengalaman di bidang ${specialty}`,
+        education: "",
+        languages: ["Indonesia"],
+        nextAvailable: undefined,
+      };
+    });
+  }
+
+  const { data: doctors = [], isLoading } = useQuery({
+    queryKey: ["psychologists", "list"],
+    queryFn: fetchDoctors,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Get unique specialties from fetched data
   const specialties: string[] = Array.from(new Set(doctors.map((d: Doctor) => d.specialty)));
 
   // Filter doctors
@@ -51,12 +142,7 @@ export default function DoctorsPage() {
       (selectedRating === "4+" && doctor.rating >= 4) ||
       (selectedRating === "4.5+" && doctor.rating >= 4.5);
 
-    const matchesAvailability =
-      selectedAvailability === "all" ||
-      (selectedAvailability === "available" && doctor.available) ||
-      (selectedAvailability === "unavailable" && !doctor.available);
-
-    return matchesSearch && matchesSpecialty && matchesRating && matchesAvailability;
+    return matchesSearch && matchesSpecialty && matchesRating;
   });
 
   // Sort doctors
@@ -78,7 +164,7 @@ export default function DoctorsPage() {
   });
 
   // Pagination
-  const totalPages = Math.ceil(sortedDoctors.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedDoctors.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedDoctors = sortedDoctors.slice(startIndex, endIndex);
@@ -93,14 +179,10 @@ export default function DoctorsPage() {
     setSearchQuery("");
     setSelectedSpecialty("all");
     setSelectedRating("all");
-    setSelectedAvailability("all");
     setCurrentPage(1);
   };
 
-  const activeFiltersCount =
-    (selectedSpecialty !== "all" ? 1 : 0) +
-    (selectedRating !== "all" ? 1 : 0) +
-    (selectedAvailability !== "all" ? 1 : 0);
+  const activeFiltersCount = (selectedSpecialty !== "all" ? 1 : 0) + (selectedRating !== "all" ? 1 : 0);
 
   return (
     <div className="container mx-auto mt-32 p-4 md:p-6">
@@ -124,11 +206,6 @@ export default function DoctorsPage() {
                 setSelectedRating(value);
                 handleFilterChange();
               }}
-              selectedAvailability={selectedAvailability}
-              setSelectedAvailability={(value) => {
-                setSelectedAvailability(value);
-                handleFilterChange();
-              }}
               specialties={specialties}
               onReset={handleResetFilters}
               activeFiltersCount={activeFiltersCount}
@@ -142,7 +219,9 @@ export default function DoctorsPage() {
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">Temukan Psikolog Profesional</h1>
             <p className="text-muted-foreground">
-              Pilih psikolog terbaik sesuai kebutuhan Anda dari {doctors.length} profesional tersedia
+              {isLoading
+                ? "Memuat daftar psikolog…"
+                : `Pilih psikolog terbaik sesuai kebutuhan Anda dari ${doctors.length} profesional tersedia`}
             </p>
           </div>
 
@@ -163,11 +242,6 @@ export default function DoctorsPage() {
               setSelectedRating(value);
               handleFilterChange();
             }}
-            selectedAvailability={selectedAvailability}
-            setSelectedAvailability={(value) => {
-              setSelectedAvailability(value);
-              handleFilterChange();
-            }}
             specialties={specialties}
             onReset={handleResetFilters}
             activeFiltersCount={activeFiltersCount}
@@ -176,8 +250,8 @@ export default function DoctorsPage() {
           {/* Controls Bar */}
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div className="text-muted-foreground text-sm">
-              Menampilkan {startIndex + 1}-{Math.min(endIndex, sortedDoctors.length)} dari {sortedDoctors.length}{" "}
-              psikolog
+              Menampilkan {sortedDoctors.length === 0 ? 0 : startIndex + 1}-{Math.min(endIndex, sortedDoctors.length)}{" "}
+              dari {sortedDoctors.length} psikolog
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -243,7 +317,16 @@ export default function DoctorsPage() {
           </div>
 
           {/* Doctor Cards */}
-          {paginatedDoctors.length > 0 ? (
+          {isLoading ? (
+            <div className={viewMode === "grid" ? "grid gap-6 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <Skeleton
+                  key={idx}
+                  className={viewMode === "grid" ? "h-[320px] w-full bg-gray-300" : "h-[160px] w-full bg-gray-300"}
+                />
+              ))}
+            </div>
+          ) : paginatedDoctors.length > 0 ? (
             <div className={viewMode === "grid" ? "grid gap-6 sm:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
               {paginatedDoctors.map((doctor) => (
                 <DoctorCard key={doctor.id} doctor={doctor} viewMode={viewMode} />
@@ -257,7 +340,7 @@ export default function DoctorsPage() {
           )}
 
           {/* Pagination */}
-          {paginatedDoctors.length > 0 && (
+          {!isLoading && paginatedDoctors.length > 0 && (
             <DoctorPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           )}
         </div>

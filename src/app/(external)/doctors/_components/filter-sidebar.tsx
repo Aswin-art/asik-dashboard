@@ -1,4 +1,4 @@
-import { X, SlidersHorizontal } from "lucide-react";
+import { X, SlidersHorizontal, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,8 +11,6 @@ interface FilterSidebarProps {
   setSelectedSpecialty: (value: string) => void;
   selectedRating: string;
   setSelectedRating: (value: string) => void;
-  selectedAvailability: string;
-  setSelectedAvailability: (value: string) => void;
   specialties: string[];
   onReset: () => void;
   activeFiltersCount: number;
@@ -25,8 +23,6 @@ export function FilterSidebar({
   setSelectedSpecialty,
   selectedRating,
   setSelectedRating,
-  selectedAvailability,
-  setSelectedAvailability,
   specialties,
   onReset,
   activeFiltersCount,
@@ -49,19 +45,23 @@ export function FilterSidebar({
       {/* Search */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Cari Psikolog</label>
-        <Input
-          placeholder="Nama atau spesialisasi..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+        <div className="relative">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            className="pl-9"
+            placeholder="Nama atau spesialisasi…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Specialty Filter */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Spesialisasi</label>
         <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
-          <SelectTrigger>
-            <SelectValue />
+          <SelectTrigger className="border-muted-foreground/20">
+            <SelectValue placeholder="Pilih spesialisasi" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Spesialisasi</SelectItem>
@@ -76,30 +76,18 @@ export function FilterSidebar({
 
       {/* Rating Filter */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Rating Minimum</label>
+        <div className="flex items-center gap-2">
+          <Star className="h-4 w-4 text-yellow-500" />
+          <label className="text-sm font-medium">Rating Minimum</label>
+        </div>
         <Select value={selectedRating} onValueChange={setSelectedRating}>
-          <SelectTrigger>
-            <SelectValue />
+          <SelectTrigger className="border-muted-foreground/20">
+            <SelectValue placeholder="Pilih rating" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Rating</SelectItem>
             <SelectItem value="4+">4.0+</SelectItem>
             <SelectItem value="4.5+">4.5+</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Availability Filter */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Ketersediaan</label>
-        <Select value={selectedAvailability} onValueChange={setSelectedAvailability}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua</SelectItem>
-            <SelectItem value="available">Tersedia</SelectItem>
-            <SelectItem value="unavailable">Tidak Tersedia</SelectItem>
           </SelectContent>
         </Select>
       </div>

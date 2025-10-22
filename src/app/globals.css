@@ -56,17 +56,17 @@
   --popover: oklch(100% 0 0);
   --popover-foreground: var(--foreground);
 
-  /* 🟣 Primary – #7820FF */
-  --primary: #7820ff;
+  /* 🔴 Primary – kuat */
+  --primary: #e91616;
   --primary-foreground: oklch(98% 0.01 95);
 
-  /* 🌿 Secondary – #3FC97A */
-  --secondary: #3fc97a;
+  /* 🩷 Secondary – merah lembut */
+  --secondary: #f85c5c;
   --secondary-foreground: oklch(18% 0.03 250);
 
-  /* 🔵 Accent – pakai secondary untuk konsistensi */
-  --accent: #3fc97a;
-  --accent-foreground: oklch(18% 0.03 250);
+  /* Accent mengikuti secondary */
+  --accent: var(--secondary);
+  --accent-foreground: var(--secondary-foreground);
 
   /* Muted & Info */
   --muted: oklch(95% 0.01 250);
@@ -110,17 +110,17 @@
   --popover: oklch(16% 0.025 255);
   --popover-foreground: var(--foreground);
 
-  /* 🟣 Primary – #7820FF */
-  --primary: #7820ff;
+  /* 🔴 Primary */
+  --primary: #e91616;
   --primary-foreground: oklch(98% 0.01 95);
 
-  /* 🌿 Secondary – #3FC97A */
-  --secondary: #3fc97a;
+  /* 🩷 Secondary – versi lembut */
+  --secondary: #f85c5c;
   --secondary-foreground: oklch(10% 0.02 255);
 
-  /* 🔵 Accent – pakai secondary */
-  --accent: #3fc97a;
-  --accent-foreground: oklch(10% 0.02 255);
+  /* Accent mengikuti secondary */
+  --accent: var(--secondary);
+  --accent-foreground: var(--secondary-foreground);
 
   /* Muted & Info */
   --muted: oklch(20% 0.015 255);

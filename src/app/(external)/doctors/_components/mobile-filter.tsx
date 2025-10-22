@@ -11,8 +11,6 @@ interface MobileFilterProps {
   setSelectedSpecialty: (value: string) => void;
   selectedRating: string;
   setSelectedRating: (value: string) => void;
-  selectedAvailability: string;
-  setSelectedAvailability: (value: string) => void;
   specialties: string[];
   onReset: () => void;
   activeFiltersCount: number;
@@ -25,8 +23,6 @@ export function MobileFilter({
   setSelectedSpecialty,
   selectedRating,
   setSelectedRating,
-  selectedAvailability,
-  setSelectedAvailability,
   specialties,
   onReset,
   activeFiltersCount,
@@ -57,8 +53,6 @@ export function MobileFilter({
             setSelectedSpecialty={setSelectedSpecialty}
             selectedRating={selectedRating}
             setSelectedRating={setSelectedRating}
-            selectedAvailability={selectedAvailability}
-            setSelectedAvailability={setSelectedAvailability}
             specialties={specialties}
             onReset={onReset}
             activeFiltersCount={activeFiltersCount}
