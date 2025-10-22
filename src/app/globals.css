@@ -3,11 +3,6 @@
 @import "uploadthing/tw/v4";
 @source "../../node_modules/@uploadthing/react/dist";
 
-/* Theme preset styles: these override CSS variables based on the selected data-theme-preset */
-@import "../styles/presets/brutalist.css";
-@import "../styles/presets/soft-pop.css";
-@import "../styles/presets/tangerine.css";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -48,106 +43,114 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Default theme styles (used when no data-theme-preset is set or when 'default' is selected).
-These serve as the fallback; there is no separate default.css file. */
+/* 🌞 LIGHT MODE */
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.15 0 180); /* Teks gelap */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0 180);
+  --background: oklch(98% 0.01 250);
+  --foreground: oklch(18% 0.05 250);
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 180);
+  --card: oklch(100% 0 0);
+  --card-foreground: var(--foreground);
 
-  --primary: oklch(0.55 0.14 190); /* Teal utama */
-  --primary-foreground: oklch(0.98 0 0); /* Teks terang di atas teal */
+  --popover: oklch(100% 0 0);
+  --popover-foreground: var(--foreground);
 
-  --secondary: oklch(0.88 0.05 170); /* Hijau sage lembut */
-  --secondary-foreground: oklch(0.2 0.05 170);
+  /* 🟣 Primary – #7820FF */
+  --primary: #7820ff;
+  --primary-foreground: oklch(98% 0.01 95);
 
-  --accent: oklch(0.92 0.08 200); /* Biru muda lembut */
-  --accent-foreground: oklch(0.15 0.05 200);
+  /* 🌿 Secondary – #3FC97A */
+  --secondary: #3fc97a;
+  --secondary-foreground: oklch(18% 0.03 250);
 
-  --muted: oklch(0.95 0.02 190); /* Netral lembut */
-  --muted-foreground: oklch(0.45 0.05 200);
+  /* 🔵 Accent – pakai secondary untuk konsistensi */
+  --accent: #3fc97a;
+  --accent-foreground: oklch(18% 0.03 250);
 
-  --destructive: oklch(0.65 0.2 30); /* Merah lembut */
-  --destructive-foreground: oklch(0.98 0 0);
+  /* Muted & Info */
+  --muted: oklch(95% 0.01 250);
+  --muted-foreground: oklch(52% 0.06 250);
 
-  --border: oklch(0.9 0 0);
-  --input: oklch(0.9 0 0);
-  --ring: oklch(0.55 0.14 190);
+  /* Status */
+  --destructive: oklch(63% 0.23 30);
+  --destructive-foreground: oklch(98% 0 0);
 
-  /* Chart */
-  --chart-1: oklch(0.55 0.14 190); /* Teal */
-  --chart-2: oklch(0.65 0.1 170); /* Sage */
-  --chart-3: oklch(0.75 0.12 200); /* Biru muda */
-  --chart-4: oklch(0.82 0.1 140); /* Hijau lembut */
-  --chart-5: oklch(0.88 0.15 240); /* Biru violet lembut */
+  /* Border & Input */
+  --border: oklch(88% 0.015 250);
+  --input: oklch(88% 0.015 250);
+  --ring: var(--primary);
+
+  /* Chart Palette */
+  --chart-1: var(--primary);
+  --chart-2: var(--secondary);
+  --chart-3: oklch(68% 0.15 260);
+  --chart-4: oklch(76% 0.18 95);
+  --chart-5: oklch(73% 0.17 50);
 
   /* Sidebar */
-  --sidebar: oklch(0.98 0 0);
-  --sidebar-foreground: oklch(0.15 0 180);
-  --sidebar-primary: oklch(0.55 0.14 190);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.92 0.08 200);
-  --sidebar-accent-foreground: oklch(0.15 0.05 200);
-  --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.55 0.14 190);
+  --sidebar: oklch(98% 0.01 250);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
+/* 🌙 DARK MODE */
 .dark {
-  /* Dark mode palette (valid CSS colors) */
-  --background: #0f172a; /* Dark navy */
-  --foreground: #f0f8ff; /* Light text */
+  --background: oklch(12% 0.03 255);
+  --foreground: oklch(94% 0.02 95);
 
-  --card: #1e293b;
-  --card-foreground: #f0f8ff;
+  --card: oklch(16% 0.025 255);
+  --card-foreground: var(--foreground);
 
-  --popover: #1e293b;
-  --popover-foreground: #f0f8ff;
+  --popover: oklch(16% 0.025 255);
+  --popover-foreground: var(--foreground);
 
-  --primary: #38b2ac; /* Teal */
-  --primary-foreground: #ffffff;
+  /* 🟣 Primary – #7820FF */
+  --primary: #7820ff;
+  --primary-foreground: oklch(98% 0.01 95);
 
-  --secondary: #86efac; /* Sage green */
-  --secondary-foreground: #1e293b;
+  /* 🌿 Secondary – #3FC97A */
+  --secondary: #3fc97a;
+  --secondary-foreground: oklch(10% 0.02 255);
 
-  --accent: #7dd3fc; /* Light sky blue */
-  --accent-foreground: #1e293b;
+  /* 🔵 Accent – pakai secondary */
+  --accent: #3fc97a;
+  --accent-foreground: oklch(10% 0.02 255);
 
-  --muted: #334155;
-  --muted-foreground: #94a3b8;
+  /* Muted & Info */
+  --muted: oklch(20% 0.015 255);
+  --muted-foreground: oklch(82% 0.02 95);
 
-  --destructive: #f87171;
+  /* Status */
+  --destructive: oklch(65% 0.24 30);
   --destructive-foreground: #ffffff;
 
-  --border: #334155;
-  --input: #334155;
-  --ring: #38b2ac;
+  /* Border & Input */
+  --border: oklch(28% 0.01 255);
+  --input: oklch(24% 0.01 255);
+  --ring: var(--primary);
 
-  /* Chart */
-  --chart-1: #38b2ac; /* Teal */
-  --chart-2: #86efac; /* Sage */
-  --chart-3: #7dd3fc; /* Sky blue */
-  --chart-4: #94a3b8; /* Gray */
-  --chart-5: #818cf8; /* Indigo */
+  /* Chart Palette */
+  --chart-1: var(--primary);
+  --chart-2: var(--secondary);
+  --chart-3: oklch(72% 0.18 250);
+  --chart-4: oklch(75% 0.2 95);
+  --chart-5: oklch(70% 0.2 50);
 
   /* Sidebar */
-  --sidebar: #1e293b;
-  --sidebar-foreground: #f0f8ff;
-  --sidebar-primary: #38b2ac;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #f0f8ff;
-  --sidebar-border: #334155;
-  --sidebar-ring: #38b2ac;
-}
-
-@layer utilities {
-  /* Custom utility classes for psychology app styling */
+  --sidebar: oklch(16% 0.025 255);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--secondary-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 @layer base {

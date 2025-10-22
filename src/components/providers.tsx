@@ -7,6 +7,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { BProgress } from "@bprogress/core";
 import { ClerkProvider } from "@clerk/nextjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -46,9 +47,11 @@ export default function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
       <QueryClientProvider client={queryClient}>
-        <RouteProgress />
-        {children}
-        <Toaster />
+        <NuqsAdapter>
+          <RouteProgress />
+          {children}
+          <Toaster />
+        </NuqsAdapter>
       </QueryClientProvider>
     </ClerkProvider>
   );

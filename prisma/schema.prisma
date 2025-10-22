@@ -244,3 +244,29 @@ model ai_consultation_notes {
   @@index([patient_id])
   @@map("ai_consultation_notes")
 }
+
+enum diagnosis_status {
+  processing
+  completed
+  failed
+}
+
+enum diagnosis_severity {
+  low
+  medium
+  high
+}
+
+model diagnosis {
+  id              BigInt              @id @default(autoincrement()) @db.BigInt
+  sessionId       String              @unique @db.VarChar(120)
+  status          diagnosis_status
+  summary         String?
+  recommendations String[]
+  severity        diagnosis_severity?
+  nextSteps       String?
+  createdAt       DateTime            @default(now())
+  completedAt     DateTime?
+
+  @@map("diagnosis")
+}

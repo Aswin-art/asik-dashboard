@@ -20,8 +20,8 @@ export const THEME_PRESET_OPTIONS = [
     label: "Default",
     value: "default",
     primary: {
-      light: "oklch(0.55 0.14 190)", // teal utama untuk light mode
-      dark: "oklch(0.75 0.08 190)", // teal lebih terang untuk dark mode
+      light: "oklch(0.56 0.17 300)",
+      dark: "oklch(0.65 0.18 300)",
     },
   },
   {
