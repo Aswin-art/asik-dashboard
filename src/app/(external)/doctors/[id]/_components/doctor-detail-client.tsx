@@ -21,14 +21,22 @@ import {
 } from "lucide-react";
 import { Doctor } from "../../_data/doctors-data";
 import { BookingModal } from "../../_components/booking-modal";
+import { useAppEnvironment } from "@/hooks/use-env";
+import { DoctorDetailTWA } from "./doctor-detail-twa";
 
 interface DoctorDetailClientProps {
   doctor: Doctor;
 }
 
 export function DoctorDetailClient({ doctor }: DoctorDetailClientProps) {
+  const env = useAppEnvironment();
   const [selectedSessionType, setSelectedSessionType] = useState<"chat" | "video">("video");
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
+
+  // TWA Mode - Show mobile-optimized version
+  if (env === "twa") {
+    return <DoctorDetailTWA doctor={doctor} />;
+  }
 
   const getInitials = (name: string) => {
     return name

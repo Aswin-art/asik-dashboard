@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/navbar";
+import { BottomNav } from "@/components/bottom-nav";
 import { ReactNode } from "react";
 
 export default async function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
@@ -7,6 +8,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <Navbar />
         {children}
+        <BottomNav />
       </body>
     </html>
   );

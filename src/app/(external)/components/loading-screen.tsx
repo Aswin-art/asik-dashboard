@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useEffect } from "react";
 
 interface LoadingScreenProps {
@@ -9,83 +9,142 @@ interface LoadingScreenProps {
 
 export function LoadingScreen({ onComplete }: LoadingScreenProps) {
   useEffect(() => {
-    const timer = setTimeout(onComplete, 3200); // ⏱️ 3.2s loading illusion
+    const timer = setTimeout(onComplete, 3200);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
+  // ✨ Letter animation
+  const letterVariants: Variants = {
+    hidden: { opacity: 0, y: 50, scale: 0.3 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.8,
+        ease: [0.6, 0.05, 0.01, 0.9],
+      },
+    },
+  };
+
+  // 🌊 Glow animation (primary blue)
+  const glowVariants: Variants = {
+    initial: { opacity: 0.4, scale: 1 },
+    animate: {
+      opacity: [0.4, 1, 0.4],
+      scale: [1, 1.2, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
+  };
+
   return (
-    <div className="from-background via-background/95 to-background fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gradient-to-br">
-      {/* 🌟 Animated Glow Circle */}
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="bg-primary/5 absolute h-[400px] w-[400px] rounded-full blur-3xl"
-      />
-
-      {/* 🧠 Logo container */}
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className="from-primary to-primary/80 relative flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br shadow-[0_0_50px_-10px_rgba(120,32,255,0.4)]"
-      >
-        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" className="text-primary-foreground drop-shadow-xl">
-          <path
-            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"
-            fill="currentColor"
-          />
-        </svg>
-      </motion.div>
-
-      {/* 🪩 Brand Name */}
-      <motion.h1
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.4 }}
-        className="text-foreground mt-8 text-3xl font-bold tracking-tight"
-      >
-        ASIK
-      </motion.h1>
-
-      <motion.p
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.6 }}
-        className="text-muted-foreground mt-1 text-sm"
-      >
-        Empowering Your Mental Wellbeing
-      </motion.p>
-
-      {/* ✨ Elegant Shimmer Line */}
-      <motion.div
-        initial={{ width: "0%" }}
-        animate={{ width: "80%" }}
-        transition={{ duration: 2, ease: "easeInOut", delay: 0.8 }}
-        className="bg-muted/50 relative mt-12 h-[2px] overflow-hidden rounded-full"
-      >
+    <div className="bg-white">
+      <div className="bg-background fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden">
+        {/* 🌟 Blue Animated Glow Circles */}
         <motion.div
-          initial={{ x: "-100%" }}
-          animate={{ x: "100%" }}
-          transition={{
-            repeat: Infinity,
-            duration: 2.8,
-            ease: "linear",
-            repeatDelay: 0.2,
-          }}
-          className="via-primary/70 absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent to-transparent blur-sm"
+          variants={glowVariants}
+          initial="initial"
+          animate="animate"
+          className="absolute h-[500px] w-[500px] rounded-full bg-[#27b3fd]/20 blur-3xl"
         />
-      </motion.div>
+        <motion.div
+          variants={glowVariants}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.5 }}
+          className="absolute h-[350px] w-[350px] rounded-full bg-[#27b3fd]/10 blur-3xl"
+        />
 
-      {/* 📜 Tagline */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.9 }}
-        transition={{ duration: 1, delay: 1.2 }}
-        className="text-muted-foreground mt-4 text-xs tracking-wide"
-      >
-        Preparing a calming experience...
-      </motion.p>
+        {/* 💠 Brand Name */}
+        <div className="relative flex items-center justify-center">
+          {/* Soft blue background glow */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.5 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="h-32 w-64 rounded-full bg-gradient-to-r from-[#27b3fd]/30 via-[#27b3fd]/10 to-[#27b3fd]/30 blur-2xl" />
+          </motion.div>
+
+          {/* Animated ASIK letters */}
+          <motion.h1 className="relative flex text-6xl font-black tracking-wider md:text-7xl">
+            {["A", "S", "I", "K"].map((letter, i) => (
+              <motion.span
+                key={i}
+                variants={letterVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: i * 0.15 }}
+                className="text-foreground relative inline-block"
+                style={{
+                  textShadow: "0 0 25px rgba(39, 179, 253, 0.7), 0 0 50px rgba(39, 179, 253, 0.4)",
+                }}
+              >
+                {letter}
+                {/* Gradient shimmer for each letter */}
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-b from-[#27b3fd]/60 via-[#27b3fd]/30 to-transparent bg-clip-text text-transparent"
+                  animate={{
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: i * 0.2,
+                  }}
+                >
+                  {letter}
+                </motion.span>
+              </motion.span>
+            ))}
+          </motion.h1>
+        </div>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.2 }}
+          className="text-muted-foreground mt-8 text-center text-base font-medium tracking-wide md:text-lg"
+        >
+          Empowering Your Mental Wellbeing
+        </motion.p>
+
+        {/* ✨ Shimmer Line */}
+        <motion.div
+          initial={{ width: "0%", opacity: 0 }}
+          animate={{ width: "60%", opacity: 1 }}
+          transition={{ duration: 1.5, ease: "easeInOut", delay: 1.5 }}
+          className="bg-muted/50 relative mt-10 h-[2px] w-[60%] overflow-hidden rounded-full"
+        >
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: "200%" }}
+            transition={{
+              repeat: Infinity,
+              duration: 2,
+              ease: "linear",
+              repeatDelay: 0.3,
+            }}
+            className="absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-[#27b3fd]/70 to-transparent"
+          />
+        </motion.div>
+
+        {/* 📜 Loading Text */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.7, 0.7] }}
+          transition={{ duration: 1.5, delay: 2 }}
+          className="text-muted-foreground mt-6 text-xs font-light tracking-widest"
+        >
+          LOADING...
+        </motion.p>
+      </div>
     </div>
   );
 }

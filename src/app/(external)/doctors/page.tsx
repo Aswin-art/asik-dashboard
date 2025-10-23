@@ -12,11 +12,16 @@ import { MobileFilter } from "./_components/mobile-filter";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAppEnvironment } from "@/hooks/use-env";
+import dynamic from "next/dynamic";
+
+const TWADoctorsPage = dynamic(() => import("./twa-page"), { ssr: false });
 
 type ViewMode = "grid" | "list";
 type SortOption = "name-asc" | "name-desc" | "rating-desc" | "experience-desc" | "price-asc";
 
 export default function DoctorsPage() {
+  const env = useAppEnvironment();
   // Search params dengan nuqs
   const [searchQuery, setSearchQuery] = useQueryState("search", parseAsString.withDefault(""));
   const [selectedSpecialty, setSelectedSpecialty] = useQueryState("specialty", parseAsString.withDefault("all"));
@@ -70,28 +75,6 @@ export default function DoctorsPage() {
     return `${years} tahun`;
   };
 
-  const getImageByGender = (gender?: string | null, fallbackUrl?: string): string => {
-    if (fallbackUrl && fallbackUrl.trim().length > 0) return fallbackUrl;
-    if (gender === "female" || gender === "perempuan") {
-      return "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&dpr=2&q=80";
-    }
-    return "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&dpr=2&q=80";
-  };
-
-  const toNumericId = (value: PsychologistResponse["id"]): number => {
-    const s = String(value);
-    const digits = (s.match(/\d+/g) || []).join("");
-    const n = digits ? Number(digits.slice(-9)) : NaN; // keep it within safe range
-    if (!Number.isNaN(n)) return n;
-    // fallback: stable hash
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      hash = (hash << 5) - hash + s.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
-  };
-
   async function fetchDoctors(): Promise<Doctor[]> {
     const response = await api.get<PsychologistApiResponse>("/psychologists");
     const { items } = response;
@@ -101,7 +84,7 @@ export default function DoctorsPage() {
       const price = parseInt(String(priceStr).replace(/[^0-9]/g, "")) || 0;
       const rating = p.rating_avg ? parseFloat(p.rating_avg) : 0;
       const specialty = p.specialties?.[0]?.specialty?.name || "Psikolog";
-      const idNum = toNumericId(p.id);
+      const idNum = String(p.id);
       return {
         id: idNum,
         name: p.user.full_name,
@@ -110,7 +93,7 @@ export default function DoctorsPage() {
         reviews: p.rating_count || 0,
         experience: calculateExperience(p.created_at),
         price,
-        image: getImageByGender(p.user.gender, p.user.image),
+        image: p.user.image,
         available: true,
         description: p.bio || `Psikolog berpengalaman di bidang ${specialty}`,
         education: "",
@@ -183,6 +166,11 @@ export default function DoctorsPage() {
   };
 
   const activeFiltersCount = (selectedSpecialty !== "all" ? 1 : 0) + (selectedRating !== "all" ? 1 : 0);
+
+  // TWA Mode - Show mobile-optimized version
+  if (env === "twa") {
+    return <TWADoctorsPage />;
+  }
 
   return (
     <div className="container mx-auto mt-32 p-4 md:p-6">

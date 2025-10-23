@@ -3,6 +3,7 @@ import { HeroSection } from "./components/hero-section";
 import type { Metadata } from "next";
 import { ReactLenis } from "lenis/react";
 import { DoctorSection } from "./components/doctor-section";
+import { CTASection } from "./components/cta-section";
 
 export const metadata: Metadata = {
   title: "ASIK - Platform Telemedicine Psikologi Terpercaya",
@@ -45,6 +46,7 @@ export default function Home() {
       <main className="pb-16 md:pb-0">
         <HeroSection />
         <DoctorSection />
+        <CTASection />
       </main>
     </OnboardingWrapper>
   );

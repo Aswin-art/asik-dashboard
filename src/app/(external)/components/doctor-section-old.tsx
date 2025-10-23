@@ -1,20 +1,19 @@
 "use client";
 
 import { SectionWrapper } from "@/components/section-wrapper";
+import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import Link from "next/link";
-import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { useAppEnvironment } from "@/hooks/use-env";
-import { motion } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -58,11 +57,13 @@ interface PsychologistApiResponse {
   items: PsychologistResponse[];
 }
 
+// 🧠 Helper: Calculate years of experience
 const calculateExperience = (createdAt: Date): string => {
   const years = new Date().getFullYear() - new Date(createdAt).getFullYear();
   return `${years} tahun`;
 };
 
+// 🧩 Fetch Function (React Query)
 async function fetchDoctors(): Promise<Doctor[]> {
   const response = await api.get<PsychologistApiResponse>("/psychologists");
   const { items } = response;
@@ -84,17 +85,17 @@ export function DoctorSection() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const env = useAppEnvironment();
 
+  // ⚡ React Query Hook
   const { data: doctors = [], isLoading } = useQuery({
     queryKey: ["psychologists"],
     queryFn: fetchDoctors,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // cache 5 menit
   });
 
-  // GSAP Animation only for browser
+  // 🎬 GSAP Entrance Animation
   useEffect(() => {
-    if (env === "twa" || isLoading || doctors.length === 0) return;
+    if (isLoading || doctors.length === 0) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -117,98 +118,10 @@ export function DoctorSection() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [env, isLoading, doctors]);
+  }, [isLoading, doctors]);
 
   const duplicatedDoctors = [...doctors, ...doctors, ...doctors];
-  const displayedDoctors = doctors.slice(0, 8);
 
-  // TWA Design - Static Grid
-  if (env === "twa") {
-    return (
-      <SectionWrapper size="full" className="px-4 py-6">
-        <div className="mx-auto w-full max-w-7xl">
-          <div className="mb-5 text-center">
-            <h2 className="text-foreground mb-2 text-2xl font-bold">Psikolog Profesional</h2>
-            <p className="text-muted-foreground text-sm">Konsultasi dengan psikolog bersertifikat</p>
-          </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <Card key={index} className="overflow-hidden p-0">
-                  <Skeleton className="h-[260px] w-full" />
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-              {displayedDoctors.map((doctor) => (
-                <Link key={doctor.id} href={`/doctors/${doctor.id}`}>
-                  <Card className="group overflow-hidden p-0 transition-shadow hover:shadow-lg">
-                    <div className="relative h-[260px] overflow-hidden">
-                      <Avatar className="h-full w-full rounded-none">
-                        <AvatarImage
-                          src={doctor.image}
-                          alt={doctor.name}
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <AvatarFallback className="rounded-none text-lg">
-                          {doctor.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-
-                      {doctor.available && (
-                        <Badge className="bg-primary absolute top-2 right-2 text-xs">
-                          <span className="relative mr-1 flex h-1.5 w-1.5">
-                            <span className="bg-primary-foreground absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                            <span className="bg-primary-foreground relative inline-flex h-1.5 w-1.5 rounded-full" />
-                          </span>
-                          Online
-                        </Badge>
-                      )}
-
-                      <div className="absolute inset-x-0 bottom-0 p-3">
-                        <div className="mb-1.5 flex items-center gap-1">
-                          <div className="bg-primary/10 flex items-center gap-0.5 rounded-full px-2 py-0.5 backdrop-blur-sm">
-                            <Star className="h-3 w-3 fill-current text-yellow-400" />
-                            <span className="text-xs font-bold text-white">{doctor.rating}</span>
-                          </div>
-                          <span className="text-xs text-white/60">({doctor.reviews})</span>
-                        </div>
-
-                        <h3 className="mb-0.5 text-sm font-bold text-white">{doctor.name}</h3>
-                        <p className="mb-1.5 text-xs text-white/90">{doctor.specialty}</p>
-
-                        <div className="border-primary/20 flex items-center justify-between border-t pt-1.5">
-                          <span className="text-xs text-white/60">Pengalaman</span>
-                          <span className="text-xs font-semibold text-white">{doctor.experience}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-5 text-center">
-            <Link href="/doctors">
-              <Button size="sm" className="shadow-md">
-                Lihat Semua Psikolog
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </SectionWrapper>
-    );
-  }
-
-  // Browser Design - Marquee Animation
   return (
     <SectionWrapper ref={sectionRef} size="full" className="overflow-hidden py-12 md:py-24">
       <div className="mb-8 text-center md:mb-12">
@@ -225,8 +138,8 @@ export function DoctorSection() {
           <div className="flex gap-6">
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="w-[280px] flex-shrink-0 md:w-[320px]">
-                <Card className="overflow-hidden p-0">
-                  <Skeleton className="h-[420px] w-full md:h-[480px]" />
+                <Card className="relative overflow-hidden p-0">
+                  <Skeleton className="h-[420px] w-full bg-gray-300 md:h-[480px]" />
                 </Card>
               </div>
             ))}
@@ -276,8 +189,8 @@ export function DoctorSection() {
                         {doctor.available && (
                           <Badge className="bg-primary absolute top-4 right-4 animate-pulse text-xs shadow-lg">
                             <span className="relative flex h-2 w-2">
-                              <span className="bg-primary-foreground absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                              <span className="bg-primary-foreground relative inline-flex h-2 w-2 rounded-full" />
+                              <span className="bg-primary-foreground absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"></span>
+                              <span className="bg-primary-foreground relative inline-flex h-2 w-2 rounded-full"></span>
                             </span>
                             <span className="ml-2">Online</span>
                           </Badge>

@@ -104,7 +104,7 @@ export function BookingModal({ open, onOpenChange, doctor, defaultSessionType }:
     setIsProcessing(true);
 
     try {
-      const response = await fetch("/api/payment/create-invoice", {
+      const response = await fetch("/api/consultation/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -119,11 +119,16 @@ export function BookingModal({ open, onOpenChange, doctor, defaultSessionType }:
 
       const data = await response.json();
 
-      if (response.ok && data.invoice_url) {
-        // Redirect ke halaman pembayaran Xendit
-        window.location.href = data.invoice_url;
+      if (response.ok) {
+        if (data.invoice_url) {
+          // Redirect ke halaman pembayaran Xendit
+          window.location.href = data.invoice_url as string;
+          return;
+        }
+        // Jika tidak ada invoice_url, anggap booking selesai
+        setCurrentStep("success");
       } else {
-        console.error("Failed to create invoice:", data.error);
+        console.error("Failed to create booking:", data?.error || data);
         setIsProcessing(false);
       }
     } catch (error) {
